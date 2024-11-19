@@ -51,8 +51,12 @@ public class MigrationService {
     }
 
     public void applyMigration(String version, String description, String sql) throws SQLException {
-        try (Statement statement = connection.createStatement()) {
-            statement.execute(sql);
+        try {
+            connection.setAutoCommit(false);
+
+            try (Statement statement = connection.createStatement()) {
+                statement.execute(sql);
+            }
 
             String insertVersionSql = "INSERT INTO schema_version (version, description, applied_at) VALUES (?, ?, ?)";
             try (PreparedStatement preparedStatement = connection.prepareStatement(insertVersionSql)) {
@@ -61,6 +65,13 @@ public class MigrationService {
                 preparedStatement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
                 preparedStatement.executeUpdate();
             }
+            connection.commit();
+        } catch (SQLException e){
+            connection.rollback();
+            System.err.println("ERROR applying migration "+version+ ": "+ e.getMessage());
+            throw e;
+        } finally {
+            connection.setAutoCommit(true);
         }
     }
 }
