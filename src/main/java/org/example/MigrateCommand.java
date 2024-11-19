@@ -31,18 +31,28 @@ public class MigrateCommand {
         }
         sortedMigrations.sort(Comparator.comparing(this::extractVersion));
 
-        for (Path file : migrationFiles) {
+        for (Path file : sortedMigrations) {
             String fileName = file.getFileName().toString();
-            String version = fileName.split("__")[0].replace("V", "");
-            String description = fileName.split("__")[1].replace(".sql", "");
+            String version = extractVersion(file);
+            String description = extractDescription(file);
 
-            if (!appliedMigrations.contains(version)) {
+            if (currentVersion == null || version.compareTo(currentVersion) > 0) {
                 String sql = Files.readString(file);
                 migrationService.applyMigration(version, description, sql);
                 System.out.println("Applied migration: " + fileName);
             } else {
-                System.out.println("Migration already applied: " + fileName);
+                System.out.println("Skipping already applied migration: " + fileName);
+            }
         }
     }
+
+    private String extractVersion(Path file) {
+        String fileName = file.getFileName().toString();
+        return fileName.split("__")[0].replace("V", "");
+    }
+
+    private String extractDescription(Path file) {
+        String fileName = file.getFileName().toString();
+        return fileName.split("__")[1].replace(".sql", "");
     }
 }
