@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/src/main/java/org/example/MigrationService.java" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/migrations/V1__init.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/migrations/V2__whatever.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/migrations/V3__addNameColumn.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/migrations/V4__addSurnameColumn.sql" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/main/resources/migrations/V5__backToInit.sql" dialect="GenericSQL" />
+  </component>
+</project>
