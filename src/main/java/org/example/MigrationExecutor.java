@@ -1,15 +1,13 @@
 package org.example;
 
-import java.io.IOException;
-import java.nio.file.*;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public class MigrationService {
+public class MigrationExecutor {
     private final Connection connection;
 
-    public MigrationService(Connection connection) {
+    public MigrationExecutor(Connection connection) {
         this.connection = connection;
     }
 
@@ -51,9 +49,6 @@ public class MigrationService {
     }
 
     public void applyMigration(String version, String description, String sql) throws SQLException {
-        try {
-            connection.setAutoCommit(false);
-
             try (Statement statement = connection.createStatement()) {
                 statement.execute(sql);
             }
@@ -65,13 +60,5 @@ public class MigrationService {
                 preparedStatement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
                 preparedStatement.executeUpdate();
             }
-            connection.commit();
-        } catch (SQLException e){
-            connection.rollback();
-            System.err.println("ERROR applying migration "+version+ ": "+ e.getMessage());
-            throw e;
-        } finally {
-            connection.setAutoCommit(true);
         }
-    }
 }

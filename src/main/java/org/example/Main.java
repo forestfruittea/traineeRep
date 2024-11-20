@@ -1,21 +1,24 @@
 package org.example;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 
 public class Main {
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
     public static void main(String[] args) {
-        String url = "jdbc:postgresql://localhost:5432/postgres";
-        String user = "postgres";
-        String password = "admin";
+        PropertiesUtils config = new PropertiesUtils();
+        ConnectionManager dbConnection = new ConnectionManager(config);
 
         try {
-            DatabaseConnection dbConnection = new DatabaseConnection(url, user, password);
+
             Connection connection = dbConnection.connect();
+            logger.debug("db is connected");
+            MigrationExecutor migrationExecutor = new MigrationExecutor(connection);
+            MigrationTool migrationTool = new MigrationTool(migrationExecutor, connection);
 
-            MigrationService migrationService = new MigrationService(connection);
-            MigrateCommand migrateCommand = new MigrateCommand(migrationService);
-
-            migrateCommand.execute();
+            migrationTool.execute();
         } catch (Exception e) {
             e.printStackTrace();
         }
