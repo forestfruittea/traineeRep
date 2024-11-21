@@ -20,7 +20,7 @@ public class Main {
 
             migrationTool.execute();
             connection.close();
-            logger.debug("connection is closed");
+            logger.debug("connectionn is closed");
         } catch (Exception e) {
             e.printStackTrace();
         }
