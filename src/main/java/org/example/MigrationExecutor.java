@@ -1,5 +1,8 @@
 package org.example;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDateTime;
@@ -7,6 +10,7 @@ import java.util.List;
 
 public class MigrationExecutor {
     private final Connection connection;
+    private static final Logger logger = LoggerFactory.getLogger(MigrationExecutor.class);
     MigrationFileReader fileReader;
 
     public MigrationExecutor(Connection connection, MigrationFileReader fileReader) {
@@ -65,15 +69,11 @@ public class MigrationExecutor {
             }
     }
     public void rollbackMigration(String version, String description, String sql) throws SQLException {
+        logger.info("Rolling back version: " + version);
         try (Statement statement = connection.createStatement()) {
             statement.execute(sql);
         }
-
-        String deleteVersionSql = "DELETE FROM schema_version WHERE version = ?";
-        try (PreparedStatement preparedStatement = connection.prepareStatement(deleteVersionSql)) {
-            preparedStatement.setString(1, version);
-            preparedStatement.executeUpdate();
-        }
+        logger.info("Rollback SQL applied for version: " + version);
     }
 }
 

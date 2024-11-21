@@ -53,17 +53,22 @@ public class MigrationTool {
         }
         logger.debug("Migration process ends");
     }
-    public void executeRollback(String version) throws SQLException {
-        logger.info("Rollback starts for version: " + version);
+    public void executeRollback(String targetVersion) throws SQLException {
+        logger.info("Rollback starts for target version: " + targetVersion);
 
         try {
             connection.setAutoCommit(false);
 
             String currentVersion = migrationExecutor.getCurrentVersion();
-            logger.info("Current database version: " + (currentVersion != null ? currentVersion : "None"));
+            if (currentVersion == null || targetVersion.compareTo(currentVersion) >= 0) {
+                logger.info("No rollback needed. Target version: " + targetVersion + ", Current version: " + currentVersion);
+                return;
+            }
 
-            // Fetch the rollback files for the specific version
-            List<MigrationFile> rollbackFiles = migrationFileReader.getRollbackFiles(version);
+            logger.info("Current database version: " + currentVersion);
+
+            // Fetch rollback files for the range (targetVersion, currentVersion]
+            List<MigrationFile> rollbackFiles = migrationFileReader.getRollbackFiles(targetVersion, currentVersion);
             for (MigrationFile rollbackFile : rollbackFiles) {
                 migrationExecutor.rollbackMigration(
                         rollbackFile.getVersion(),
@@ -72,15 +77,15 @@ public class MigrationTool {
                 );
             }
 
-            // Remove the specific entry from the schema_version table (this version)
-            String deleteVersionSql = "DELETE FROM schema_version WHERE version = ?";
-            try (PreparedStatement preparedStatement = connection.prepareStatement(deleteVersionSql)) {
-                preparedStatement.setString(1, version);
+            // Remove schema_version entries for versions higher than the target version
+            String deleteVersionsSql = "DELETE FROM schema_version WHERE version > ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(deleteVersionsSql)) {
+                preparedStatement.setString(1, targetVersion);
                 preparedStatement.executeUpdate();
             }
 
             connection.commit();
-            logger.info("Rollback applied successfully for version: " + version);
+            logger.info("Rollback completed successfully to version: " + targetVersion);
         } catch (SQLException | IOException e) {
             connection.rollback();
             logger.error("Rollback process failed: {}", e.getMessage(), e);

@@ -20,7 +20,7 @@ public class Main {
             MigrationTool migrationTool = new MigrationTool(migrationExecutor, connection);
 
             migrationTool.executeMigration();
-
+            migrationTool.executeRollback("2");
             connection.close();
             logger.debug("connection is closed");
         } catch (Exception e) {
