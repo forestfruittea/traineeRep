@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -51,5 +52,42 @@ public class MigrationTool {
             connection.setAutoCommit(true);
         }
         logger.debug("Migration process ends");
+    }
+    public void executeRollback(String version) throws SQLException {
+        logger.info("Rollback starts for version: " + version);
+
+        try {
+            connection.setAutoCommit(false);
+
+            String currentVersion = migrationExecutor.getCurrentVersion();
+            logger.info("Current database version: " + (currentVersion != null ? currentVersion : "None"));
+
+            // Fetch the rollback files for the specific version
+            List<MigrationFile> rollbackFiles = migrationFileReader.getRollbackFiles(version);
+            for (MigrationFile rollbackFile : rollbackFiles) {
+                migrationExecutor.rollbackMigration(
+                        rollbackFile.getVersion(),
+                        rollbackFile.getDescription(),
+                        rollbackFile.getSql()
+                );
+            }
+
+            // Remove the specific entry from the schema_version table (this version)
+            String deleteVersionSql = "DELETE FROM schema_version WHERE version = ?";
+            try (PreparedStatement preparedStatement = connection.prepareStatement(deleteVersionSql)) {
+                preparedStatement.setString(1, version);
+                preparedStatement.executeUpdate();
+            }
+
+            connection.commit();
+            logger.info("Rollback applied successfully for version: " + version);
+        } catch (SQLException | IOException e) {
+            connection.rollback();
+            logger.error("Rollback process failed: {}", e.getMessage(), e);
+            throw new SQLException("Rollback process failed", e);
+        } finally {
+            connection.setAutoCommit(true);
+        }
+        logger.debug("Rollback process ends");
     }
 }

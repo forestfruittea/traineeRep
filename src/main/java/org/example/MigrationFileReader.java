@@ -30,7 +30,20 @@ public class MigrationFileReader {
         sortedMigrations.sort(Comparator.comparing(MigrationFile::getVersion));
         return sortedMigrations;
     }
+    public List<MigrationFile> getRollbackFiles(String version) throws IOException {
+        // Find the rollback file for a specific version
+        DirectoryStream<Path> rollbackFiles = Files.newDirectoryStream(rollbackDir, version + "__*.sql");
+        List<MigrationFile> sortedRollbacks = new ArrayList<>();
 
+        for (Path file : rollbackFiles) {
+            String description = "rollback";
+            String sqlContent = Files.readString(file);
+
+            sortedRollbacks.add(new MigrationFile(version, description, sqlContent));
+        }
+
+        return sortedRollbacks;
+    }
 
     private String extractVersion(String fileName) {
         return fileName.split("__")[0].replace("V", "");

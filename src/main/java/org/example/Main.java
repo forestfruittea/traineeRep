@@ -10,15 +10,17 @@ public class Main {
     public static void main(String[] args) {
         PropertiesUtils config = new PropertiesUtils();
         ConnectionManager connectionManager = new ConnectionManager(config);
+        MigrationFileReader migrationFileReader = new MigrationFileReader();
 
         try {
 
             Connection connection = connectionManager.connect();
             logger.debug("db is connected");
-            MigrationExecutor migrationExecutor = new MigrationExecutor(connection, new MigrationFileReader());
+            MigrationExecutor migrationExecutor = new MigrationExecutor(connection, migrationFileReader);
             MigrationTool migrationTool = new MigrationTool(migrationExecutor, connection);
 
             migrationTool.executeMigration();
+
             connection.close();
             logger.debug("connection is closed");
         } catch (Exception e) {

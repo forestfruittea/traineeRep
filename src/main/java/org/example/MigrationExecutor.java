@@ -64,5 +64,16 @@ public class MigrationExecutor {
                 preparedStatement.executeUpdate();
             }
     }
+    public void rollbackMigration(String version, String description, String sql) throws SQLException {
+        try (Statement statement = connection.createStatement()) {
+            statement.execute(sql);
+        }
+
+        String deleteVersionSql = "DELETE FROM schema_version WHERE version = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(deleteVersionSql)) {
+            preparedStatement.setString(1, version);
+            preparedStatement.executeUpdate();
+        }
+    }
 }
 
