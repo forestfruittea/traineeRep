@@ -1,14 +1,17 @@
 package org.example;
 
+import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class MigrationExecutor {
     private final Connection connection;
+    MigrationFileReader fileReader;
 
-    public MigrationExecutor(Connection connection) {
+    public MigrationExecutor(Connection connection, MigrationFileReader fileReader) {
         this.connection = connection;
+        this.fileReader = fileReader;
     }
 
     public void initializeSchemaTable() throws SQLException {
@@ -60,5 +63,6 @@ public class MigrationExecutor {
                 preparedStatement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
                 preparedStatement.executeUpdate();
             }
-        }
+    }
 }
+

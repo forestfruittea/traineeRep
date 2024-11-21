@@ -9,18 +9,18 @@ public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     public static void main(String[] args) {
         PropertiesUtils config = new PropertiesUtils();
-        ConnectionManager dbConnection = new ConnectionManager(config);
+        ConnectionManager connectionManager = new ConnectionManager(config);
 
         try {
 
-            Connection connection = dbConnection.connect();
+            Connection connection = connectionManager.connect();
             logger.debug("db is connected");
-            MigrationExecutor migrationExecutor = new MigrationExecutor(connection);
+            MigrationExecutor migrationExecutor = new MigrationExecutor(connection, new MigrationFileReader());
             MigrationTool migrationTool = new MigrationTool(migrationExecutor, connection);
 
-            migrationTool.execute();
+            migrationTool.executeMigration();
             connection.close();
-            logger.debug("connectionn is closed");
+            logger.debug("connection is closed");
         } catch (Exception e) {
             e.printStackTrace();
         }

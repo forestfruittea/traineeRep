@@ -4,11 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.file.*;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class MigrationTool {
@@ -22,7 +19,7 @@ public class MigrationTool {
         this.connection = connection;
     }
 
-    public void execute() throws SQLException {
+    public void executeMigration() throws SQLException {
         migrationExecutor.initializeSchemaTable();
         logger.info("Migration starts");
 

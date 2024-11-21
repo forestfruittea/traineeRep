@@ -8,6 +8,7 @@ import java.util.List;
 
 public class MigrationFileReader {
     private final Path migrationDir = Paths.get("src/main/resources/migrations");
+    private final Path rollbackDir = Paths.get("src/main/resources/rollbacks");
 
     public MigrationFileReader() {
 
@@ -29,6 +30,7 @@ public class MigrationFileReader {
         sortedMigrations.sort(Comparator.comparing(MigrationFile::getVersion));
         return sortedMigrations;
     }
+
 
     private String extractVersion(String fileName) {
         return fileName.split("__")[0].replace("V", "");

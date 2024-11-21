@@ -1,5 +1,6 @@
 package org.example;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -8,6 +9,7 @@ public class ConnectionManager {
     private final PropertiesUtils config;
 
     public ConnectionManager(PropertiesUtils config) {
+
         this.config=config;
     }
 
