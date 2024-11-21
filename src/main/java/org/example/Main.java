@@ -19,6 +19,8 @@ public class Main {
             MigrationTool migrationTool = new MigrationTool(migrationExecutor, connection);
 
             migrationTool.execute();
+            connection.close();
+            logger.debug("connection is closed");
         } catch (Exception e) {
             e.printStackTrace();
         }
