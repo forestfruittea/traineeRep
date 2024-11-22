@@ -1,7 +1,6 @@
 package org.example;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,9 +8,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-
+@Slf4j
 public class MigrationLockService {
-    private static final Logger logger = LoggerFactory.getLogger(MigrationLockService.class);
+
     private final Connection connection;
 
     public MigrationLockService(Connection connection) {
@@ -19,7 +18,7 @@ public class MigrationLockService {
     }
 
     public void lock(String lockedBy) throws SQLException {
-        logger.info("Attempting to acquire lock...");
+        log.info("Attempting to acquire lock...");
 
         String checkLockSql = """
                 SELECT is_locked 
@@ -55,10 +54,10 @@ public class MigrationLockService {
             }
 
             connection.commit();
-            logger.info("Lock acquired successfully by: " + lockedBy);
+            log.info("Lock acquired successfully by: " + lockedBy);
         } catch (SQLException | IllegalStateException e) {
             connection.rollback();
-            logger.error("Failed to acquire lock: {}", e.getMessage());
+            log.error("Failed to acquire lock: {}", e.getMessage());
             throw e;
         } finally {
             connection.setAutoCommit(true);
@@ -66,7 +65,7 @@ public class MigrationLockService {
     }
 
     public void unlock() throws SQLException {
-        logger.info("Releasing lock...");
+        log.info("Releasing lock...");
 
         String unlockSql = """
                 UPDATE migration_lock 
@@ -79,9 +78,9 @@ public class MigrationLockService {
         try (PreparedStatement unlockStmt = connection.prepareStatement(unlockSql)) {
             int rowsUpdated = unlockStmt.executeUpdate();
             if (rowsUpdated > 0) {
-                logger.info("Lock released successfully.");
+                log.info("Lock released successfully.");
             } else {
-                logger.warn("Lock was not held.");
+                log.warn("Lock was not held.");
             }
         }
     }
@@ -97,12 +96,12 @@ public class MigrationLockService {
             ResultSet resultSet = checkLockStmt.executeQuery();
             if (resultSet.next()) {
                 boolean locked = resultSet.getBoolean("is_locked");
-                logger.info("Lock status: " + (locked ? "Locked" : "Unlocked"));
+                log.info("Lock status: " + (locked ? "Locked" : "Unlocked"));
                 return locked;
             }
 
             // If no row exists, assume unlocked
-            logger.info("No lock record found. Assuming unlocked.");
+            log.info("No lock record found. Assuming unlocked.");
             return false;
         }
     }

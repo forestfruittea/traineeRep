@@ -1,18 +1,18 @@
 package org.example;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
+@Slf4j
 public class MigrationFileReader {
     private final Path migrationDir = Paths.get("src/main/resources/migrations");
     private final Path rollbackDir = Paths.get("src/main/resources/rollbacks");
-    private static final Logger logger = LoggerFactory.getLogger(MigrationFileReader.class);
 
 
     public MigrationFileReader() {
@@ -36,7 +36,7 @@ public class MigrationFileReader {
         return sortedMigrations;
     }
     public List<MigrationFile> getRollbackFiles(String targetVersion, String currentVersion) throws IOException {
-        logger.debug("Fetching rollback files for target version: " + targetVersion + ", current version: " + currentVersion);
+        log.debug("Fetching rollback files for target version: " + targetVersion + ", current version: " + currentVersion);
 
         DirectoryStream<Path> rollbackFiles = Files.newDirectoryStream(rollbackDir, "V*__rollback.sql");
         List<MigrationFile> filteredRollbacks = new ArrayList<>();
@@ -47,17 +47,17 @@ public class MigrationFileReader {
 
             // Include files with version greater than or equal to targetVersion and less than or equal to currentVersion
             if (version.compareTo(targetVersion) >= 0 && version.compareTo(currentVersion) <= 0) {
-                logger.debug("Including rollback file: " + fileName);
+                log.debug("Including rollback file: " + fileName);
                 String sqlContent = Files.readString(file);
                 filteredRollbacks.add(new MigrationFile(version, "rollback", sqlContent));
             } else {
-                logger.debug("Excluding rollback file: " + fileName);
+                log.debug("Excluding rollback file: " + fileName);
             }
         }
 
         // Sort rollback files in descending order to apply them in reverse order
         filteredRollbacks.sort(Comparator.comparing(MigrationFile::getVersion).reversed());
-        logger.debug("Filtered and sorted rollback files: " + filteredRollbacks);
+        log.debug("Filtered and sorted rollback files: " + filteredRollbacks);
         return filteredRollbacks;
     }
 

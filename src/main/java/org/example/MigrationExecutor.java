@@ -1,23 +1,15 @@
 package org.example;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.List;
-
+@Slf4j
+@RequiredArgsConstructor
 public class MigrationExecutor {
     private final Connection connection;
-    private static final Logger logger = LoggerFactory.getLogger(MigrationExecutor.class);
-    MigrationFileReader fileReader;
-
-    public MigrationExecutor(Connection connection, MigrationFileReader fileReader) {
-        this.connection = connection;
-        this.fileReader = fileReader;
-    }
-
     public void initializeSchemaTable() throws SQLException {
         String sql = """
                 CREATE TABLE IF NOT EXISTS schema_version (
@@ -82,11 +74,11 @@ public class MigrationExecutor {
             }
     }
     public void rollbackMigration(String version, String description, String sql) throws SQLException {
-        logger.info("Rolling back version: " + version);
+        log.info("Rolling back version: {}", version);
         try (Statement statement = connection.createStatement()) {
             statement.execute(sql);
         }
-        logger.info("Rollback SQL applied for version: " + version);
+        log.info("Rollback SQL applied for version: " + version);
     }
 }
 
