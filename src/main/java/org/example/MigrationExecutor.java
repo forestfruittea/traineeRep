@@ -30,6 +30,19 @@ public class MigrationExecutor {
             statement.execute(sql);
         }
     }
+    public void initializeLockTable() throws SQLException{
+        String sql = """
+                CREATE TABLE IF NOT EXISTS migration_lock (
+                    id INT PRIMARY KEY CHECK (id = 1),
+                    is_locked BOOLEAN NOT NULL,
+                    locked_at TIMESTAMP,
+                    locked_by VARCHAR(255)
+                );
+                """;
+        try (Statement statement = connection.createStatement()){
+            statement.execute(sql);
+        }
+    }
 
     public List<String> getAppliedMigrations() throws SQLException {
         String sql = "SELECT version FROM schema_version ORDER BY version";

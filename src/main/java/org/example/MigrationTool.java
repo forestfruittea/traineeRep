@@ -12,16 +12,27 @@ import java.util.List;
 public class MigrationTool {
     private final MigrationExecutor migrationExecutor;
     private final Connection connection;
+    private final PropertiesUtils propertiesUtils;
     private static final Logger logger = LoggerFactory.getLogger(MigrationTool.class);
     private final MigrationFileReader migrationFileReader = new MigrationFileReader();
 
-    public MigrationTool(MigrationExecutor migrationExecutor, Connection connection) {
+
+    public MigrationTool(MigrationExecutor migrationExecutor, Connection connection, PropertiesUtils propertiesUtils) {
         this.migrationExecutor = migrationExecutor;
         this.connection = connection;
+        this.propertiesUtils = propertiesUtils;
     }
 
     public void executeMigration() throws SQLException {
-        migrationExecutor.initializeSchemaTable();
+        MigrationLockService migrationLockService = new MigrationLockService(connection);
+
+        if (migrationLockService.isLocked()) {
+            logger.error("Cannot start migration. Database is locked.");
+            throw new IllegalStateException("Database is locked by another process.");
+        }
+
+        migrationLockService.lock(propertiesUtils.getUsername());
+
         logger.info("Migration starts");
 
         try {
@@ -49,16 +60,24 @@ public class MigrationTool {
             logger.error("Migration process failed: {}", e.getMessage(), e);
             throw new SQLException("Migration process failed", e);
         } finally {
+            migrationLockService.unlock();
             connection.setAutoCommit(true);
         }
         logger.debug("Migration process ends");
     }
     public void executeRollback(String targetVersion) throws SQLException {
+        MigrationLockService migrationLockService = new MigrationLockService(connection);
+        if (migrationLockService.isLocked()) {
+            logger.error("Cannot start rollback. Database is locked.");
+            throw new IllegalStateException("Database is locked by another process.");
+        }
+
         logger.info("Rollback starts for target version: " + targetVersion);
+        migrationLockService.lock(propertiesUtils.getUsername());
+
 
         try {
             connection.setAutoCommit(false);
-
             String currentVersion = migrationExecutor.getCurrentVersion();
             if (currentVersion == null || targetVersion.compareTo(currentVersion) >= 0) {
                 logger.info("No rollback needed. Target version: " + targetVersion + ", Current version: " + currentVersion);
@@ -83,15 +102,20 @@ public class MigrationTool {
                 preparedStatement.setString(1, targetVersion);
                 preparedStatement.executeUpdate();
             }
+            logger.debug("just before the commit");
 
             connection.commit();
             logger.info("Rollback completed successfully to version: " + targetVersion);
         } catch (SQLException | IOException e) {
+
             connection.rollback();
             logger.error("Rollback process failed: {}", e.getMessage(), e);
             throw new SQLException("Rollback process failed", e);
         } finally {
+            migrationLockService.unlock();
             connection.setAutoCommit(true);
+            logger.debug("set autocommit true");
+
         }
         logger.debug("Rollback process ends");
     }

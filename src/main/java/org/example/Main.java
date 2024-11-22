@@ -11,16 +11,19 @@ public class Main {
         PropertiesUtils config = new PropertiesUtils();
         ConnectionManager connectionManager = new ConnectionManager(config);
         MigrationFileReader migrationFileReader = new MigrationFileReader();
+        MigrationLockService migrationLockService;
 
         try {
 
             Connection connection = connectionManager.connect();
             logger.debug("db is connected");
             MigrationExecutor migrationExecutor = new MigrationExecutor(connection, migrationFileReader);
-            MigrationTool migrationTool = new MigrationTool(migrationExecutor, connection);
-
+            MigrationTool migrationTool = new MigrationTool(migrationExecutor, connection, config);
+            migrationExecutor.initializeSchemaTable();
+            migrationExecutor.initializeLockTable();
             migrationTool.executeMigration();
-            migrationTool.executeRollback("2");
+            migrationTool.executeRollback("1");
+
             connection.close();
             logger.debug("connection is closed");
         } catch (Exception e) {
