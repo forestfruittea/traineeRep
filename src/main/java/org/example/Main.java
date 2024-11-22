@@ -12,8 +12,6 @@ public class Main {
     public static void main(String[] args) {
         PropertiesUtils config = new PropertiesUtils();
         ConnectionManager connectionManager = new ConnectionManager(config);
-        MigrationFileReader migrationFileReader = new MigrationFileReader();
-
         try {
 
             Connection connection = connectionManager.connect();
