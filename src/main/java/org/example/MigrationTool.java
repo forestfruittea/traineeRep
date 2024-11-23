@@ -117,5 +117,30 @@ public class MigrationTool {
         }
         log.debug("Rollback process ends");
     }
+    public void executeStatus() throws SQLException{
+        try {
+            List<String> appliedMigrations = migrationExecutor.getAppliedMigrations();
+            String currentVersion = migrationExecutor.getCurrentVersion();
+
+            if (currentVersion != null) {
+                System.out.println("Current database version: " + currentVersion);
+            } else {
+                System.out.println("No migrations have been applied yet.");
+            }
+
+            System.out.println("Applied migrations:");
+            if (appliedMigrations.isEmpty()) {
+                System.out.println("No migrations applied.");
+            } else {
+                for (String version : appliedMigrations) {
+                    System.out.println("- " + version);
+                }
+            }
+
+        } catch (SQLException e) {
+            System.err.println("Error fetching status: " + e.getMessage());
+        }
+    }
 }
+
 
