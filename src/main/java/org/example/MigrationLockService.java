@@ -54,14 +54,12 @@ public class MigrationLockService {
             }
 
             connection.commit();
-            Thread.sleep(5000);
+
             log.info("Lock acquired successfully by: " + lockedBy);
         } catch (SQLException | IllegalStateException e) {
             connection.rollback();
             log.error("Failed to acquire lock: {}", e.getMessage());
             throw e;
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         } finally {
             connection.setAutoCommit(true);
         }

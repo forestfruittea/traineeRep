@@ -20,8 +20,10 @@ public class Main {
             MigrationTool migrationTool = new MigrationTool(migrationExecutor, connection, config);
             migrationExecutor.initializeSchemaTable();
             migrationExecutor.initializeLockTable();
+            FileUtils.ensureDirectoryExists("reports");
+
             migrationTool.executeMigration();
-            migrationTool.executeRollback("1");
+
 
             connection.close();
             log.debug("connection is closed");

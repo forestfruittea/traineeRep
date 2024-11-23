@@ -61,10 +61,10 @@ public class MigrationExecutor {
     }
 
     public void applyMigration(String version, String description, String sql) throws SQLException {
-            try (Statement statement = connection.createStatement()) {
+        MigrationReport migrationReport = null;
+        log.debug("Migrating to version: {}", version);
+        try (Statement statement = connection.createStatement()) {
                 statement.execute(sql);
-            }
-
             String insertVersionSql = "INSERT INTO schema_version (version, description, applied_at) VALUES (?, ?, ?)";
             try (PreparedStatement preparedStatement = connection.prepareStatement(insertVersionSql)) {
                 preparedStatement.setString(1, version);
@@ -72,13 +72,60 @@ public class MigrationExecutor {
                 preparedStatement.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now()));
                 preparedStatement.executeUpdate();
             }
+            migrationReport = MigrationReport.builder()
+                    .version(version)
+                    .description(description)
+                    .status("SUCCESS")
+                    .timestamp(Timestamp.valueOf(LocalDateTime.now()))
+                    .build();
+
+            log.info("Migration applied successfully for version: {}", version);
+        } catch (SQLException e) {
+            migrationReport = MigrationReport.builder()
+                    .version(version)
+                    .description(description)
+                    .status("FAILED")
+                    .timestamp(Timestamp.valueOf(LocalDateTime.now()))
+                    .errorMessage(e.getMessage())
+                    .build();
+
+            log.error("Migration failed for version: {}", version, e);
+            throw e;
+        } finally {
+            if(migrationReport != null){
+            ReportWriter.writeReport(migrationReport, "reports/migration_" + version + ".json");
+            }
+        }
     }
+
     public void rollbackMigration(String version, String description, String sql) throws SQLException {
-        log.info("Rolling back version: {}", version);
+        log.debug("Rolling back version: {}", version);
+        MigrationReport migrationReport = null;
+
         try (Statement statement = connection.createStatement()) {
             statement.execute(sql);
-        }
+
+            migrationReport = MigrationReport.builder()
+                    .version(version)
+                    .description(description)
+                    .status("SUCCESS")
+                    .timestamp(Timestamp.valueOf(LocalDateTime.now()))
+                    .build();
+
         log.info("Rollback SQL applied for version: " + version);
+    } catch (SQLException e){
+            migrationReport = MigrationReport.builder()
+                    .version(version)
+                    .description(description)
+                    .status("FAILED")
+                    .timestamp(Timestamp.valueOf(LocalDateTime.now()))
+                    .errorMessage(e.getMessage())
+                    .build();
+            log.error("Rollback failed for version: {}", version, e);
+            throw e;
+        } if(migrationReport != null){
+            ReportWriter.writeReport(migrationReport, "reports/rollback_" + version + ".json");
+        }
     }
 }
 

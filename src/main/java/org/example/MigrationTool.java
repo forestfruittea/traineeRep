@@ -48,8 +48,8 @@ public class MigrationTool {
                             migrationFile.getSql()
                     );
                 }}
-                connection.commit();
-                log.info("All migrations applied successfully");
+            connection.commit();
+            log.info("All migrations applied successfully");
 
 
         }catch (SQLException | IOException e) {
@@ -118,3 +118,4 @@ public class MigrationTool {
         log.debug("Rollback process ends");
     }
 }
+

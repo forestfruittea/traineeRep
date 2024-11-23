@@ -35,11 +35,19 @@
             <artifactId>log4j-api</artifactId>
             <version>2.20.0</version>
         </dependency>
+
+
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.15.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.15.1</version> <!-- Use the latest compatible version -->
+        </dependency>
+
 
 
         <dependency>
