@@ -11,8 +11,9 @@ import java.util.Comparator;
 import java.util.List;
 @Slf4j
 public class MigrationFileReader {
-    private final Path migrationDir = Paths.get("src/main/resources/migrations");
-    private final Path rollbackDir = Paths.get("src/main/resources/rollbacks");
+    PropertiesUtils config = new PropertiesUtils();
+    private final Path migrationDir = config.getMigrationsPath();
+    private final Path rollbackDir = config.getRollbacksPath();
 
 
     public MigrationFileReader() {

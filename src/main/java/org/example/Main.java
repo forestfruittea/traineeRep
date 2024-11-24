@@ -25,7 +25,8 @@ public class Main {
             MigrationTool migrationTool = new MigrationTool(migrationExecutor, connection, config);
             migrationExecutor.initializeSchemaTable();
             migrationExecutor.initializeLockTable();
-            FileUtils.ensureDirectoryExists("reports");
+            migrationTool.migrate();
+            migrationTool.rollback("2");
 
             cmd.addSubcommand("migrate", new MigrateCommand(migrationTool));
             cmd.addSubcommand("rollback", new RollbackCommand(migrationTool));

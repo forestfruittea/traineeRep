@@ -6,10 +6,14 @@ import lombok.extern.slf4j.Slf4j;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Properties;
+
 @Slf4j
 @RequiredArgsConstructor
 public class MigrationExecutor {
     private final Connection connection;
+    private final PropertiesUtils config = new PropertiesUtils();
+    private final String filePath = config.getReportsPath();
     public void initializeSchemaTable() throws SQLException {
         String sql = """
                 CREATE TABLE IF NOT EXISTS schema_version (
@@ -93,7 +97,7 @@ public class MigrationExecutor {
             throw e;
         } finally {
             if(migrationReport != null){
-            ReportWriter.writeReport(migrationReport, "reports/migration_" + version + ".json");
+            ReportWriter.writeReport(migrationReport, filePath+"/migration_" + version + ".json");
             }
         }
     }
@@ -124,7 +128,7 @@ public class MigrationExecutor {
             log.error("Rollback failed for version: {}", version, e);
             throw e;
         } if(migrationReport != null){
-            ReportWriter.writeReport(migrationReport, "reports/rollback_" + version + ".json");
+            ReportWriter.writeReport(migrationReport, filePath+"/rollback_" + version + ".json");
         }
     }
 }

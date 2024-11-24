@@ -2,8 +2,6 @@
 package org.example;
 import lombok.extern.slf4j.Slf4j;
 import picocli.CommandLine.Command;
-import picocli.CommandLine.Option;
-import picocli.CommandLine.Parameters;
 
 import java.sql.SQLException;
 @Slf4j
@@ -17,7 +15,7 @@ public class MigrateCommand implements Runnable{
     @Override
     public void run() {
         try {
-            migrationTool.executeMigration();
+            migrationTool.migrate();
         } catch (SQLException e){
             log.error("Error during migration: " + e.getMessage());
         }

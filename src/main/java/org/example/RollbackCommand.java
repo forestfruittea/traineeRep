@@ -19,7 +19,7 @@ public class RollbackCommand implements Runnable {
     @Override
     public void run() {
         try {
-            migrationTool.executeRollback(targetVersion);
+            migrationTool.rollback(targetVersion);
         } catch (SQLException e) {
             System.err.println("Error during rollback: " + e.getMessage());
         }

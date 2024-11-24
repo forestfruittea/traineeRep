@@ -16,7 +16,7 @@ public class StatusCommand implements Runnable {
     @Override
     public void run() {
         try {
-            migrationTool.executeStatus();
+            migrationTool.status();
         } catch (SQLException e) {
             System.err.println("Error fetching status: " + e.getMessage());
         }

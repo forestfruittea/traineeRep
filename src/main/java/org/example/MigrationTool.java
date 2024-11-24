@@ -21,7 +21,7 @@ public class MigrationTool {
         this.propertiesUtils = propertiesUtils;
     }
 
-    public void executeMigration() throws SQLException {
+    public void migrate() throws SQLException {
         MigrationLockService migrationLockService = new MigrationLockService(connection);
 
         if (migrationLockService.isLocked()) {
@@ -63,7 +63,7 @@ public class MigrationTool {
         }
         log.debug("Migration process ends");
     }
-    public void executeRollback(String targetVersion) throws SQLException {
+    public void rollback(String targetVersion) throws SQLException {
         MigrationLockService migrationLockService = new MigrationLockService(connection);
         if (migrationLockService.isLocked()) {
             log.error("Cannot start rollback. Database is locked.");
@@ -117,7 +117,7 @@ public class MigrationTool {
         }
         log.debug("Rollback process ends");
     }
-    public void executeStatus() throws SQLException{
+    public void status() throws SQLException{
         try {
             List<String> appliedMigrations = migrationExecutor.getAppliedMigrations();
             String currentVersion = migrationExecutor.getCurrentVersion();
