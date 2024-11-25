@@ -1,11 +1,16 @@
 
-package org.example;
+package org.example.CLICommands;
+import lombok.extern.slf4j.Slf4j;
+import org.example.MigrationTool.MigrationTool;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Option;
 
 import java.sql.SQLException;
-
+/**
+ * CLI Command to rollback db state to a specified version.
+ */
 @Command(name = "rollback", description = "Rollback last applied migration")
+@Slf4j
 public class RollbackCommand implements Runnable {
 
     private final MigrationTool migrationTool;
@@ -21,7 +26,7 @@ public class RollbackCommand implements Runnable {
         try {
             migrationTool.rollback(targetVersion);
         } catch (SQLException e) {
-            System.err.println("Error during rollback: " + e.getMessage());
+            log.error("Error during rollback: " + e.getMessage());
         }
     }
 }

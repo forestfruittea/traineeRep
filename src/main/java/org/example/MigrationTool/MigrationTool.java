@@ -1,12 +1,18 @@
-package org.example;
+package org.example.MigrationTool;
 
 import lombok.extern.slf4j.Slf4j;
+import org.example.MigrationFile.MigrationFile;
+import org.example.MigrationFile.MigrationFileReader;
+import org.example.Utils.PropertiesUtils;
 
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.List;
+/**
+ * Handles the migration process. Contains core logic
+ */
 @Slf4j
 public class MigrationTool {
     private final MigrationExecutor migrationExecutor;
@@ -20,16 +26,17 @@ public class MigrationTool {
         this.connection = connection;
         this.propertiesUtils = propertiesUtils;
     }
-
+    //Executes the migration process in a single transaction,
+    // checks if the db is locked or not, rollbacks the transaction in case of any error
     public void migrate() throws SQLException {
-        MigrationLockService migrationLockService = new MigrationLockService(connection);
+        MigrationLock migrationLock = new MigrationLock(connection);
 
-        if (migrationLockService.isLocked()) {
+        if (migrationLock.isLocked()) {
             log.error("Cannot start migration. Database is locked.");
             throw new IllegalStateException("Database is locked by another process.");
         }
 
-        migrationLockService.lock(propertiesUtils.getUsername());
+        migrationLock.lock(propertiesUtils.getUsername());
 
         log.info("Migration starts");
 
@@ -58,20 +65,21 @@ public class MigrationTool {
             log.error("Migration process failed: {}", e.getMessage(), e);
             throw new SQLException("Migration process failed", e);
         } finally {
-            migrationLockService.unlock();
+            migrationLock.unlock();
             connection.setAutoCommit(true);
         }
         log.info("Migration process ends");
     }
+    //Executes the rollback process in a single transaction,
+    // checks if the db is locked or not, rollbacks the transaction in case of any error
     public void rollback(String targetVersion) throws SQLException {
-        MigrationLockService migrationLockService = new MigrationLockService(connection);
-        if (migrationLockService.isLocked()) {
+        MigrationLock migrationLock = new MigrationLock(connection);
+        if (migrationLock.isLocked()) {
             log.error("Cannot start rollback. Database is locked.");
             throw new IllegalStateException("Database is locked by another process.");
         }
 
-        log.info("Rollback starts for target version: " + targetVersion);
-        migrationLockService.lock(propertiesUtils.getUsername());
+        migrationLock.lock(propertiesUtils.getUsername());
 
 
         try {
@@ -110,13 +118,18 @@ public class MigrationTool {
             log.error("Rollback process failed: {}", e.getMessage(), e);
             throw new SQLException("Rollback process failed", e);
         } finally {
-            migrationLockService.unlock();
+            migrationLock.unlock();
             connection.setAutoCommit(true);
             log.debug("set autocommit true");
 
         }
         log.debug("Rollback process ends");
     }
+    /**
+     * Displays the current status of migrations, including the current version and applied migrations.
+     *
+     * @throws SQLException if a database error occurs
+     */
     public void status() throws SQLException{
         try {
             List<String> appliedMigrations = migrationExecutor.getAppliedMigrations();

@@ -1,10 +1,13 @@
-package org.example;
+package org.example.MigrationReport;
 
 import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
+
+/**
+ * Represents a report generated for a migration process.
+ */
 
 @Data
 @Builder

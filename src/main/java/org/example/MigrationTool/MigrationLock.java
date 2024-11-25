@@ -1,4 +1,4 @@
-package org.example;
+package org.example.MigrationTool;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -8,14 +8,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+/**
+ * Service for acquiring and releasing a lock for the migration process.
+ */
 @Slf4j
-public class MigrationLockService {
+public class MigrationLock {
 
     private final Connection connection;
 
-    public MigrationLockService(Connection connection) {
+    public MigrationLock(Connection connection) {
         this.connection = connection;
     }
+    /**
+     * Acquires a lock for the migration process. Throws an exception if the lock is already acquired.
+     *
+     * @param lockedBy the user or process requesting the lock
+     * @throws SQLException if a database error occurs
+     */
 
     public void lock(String lockedBy) throws SQLException {
         log.debug("Attempting to acquire lock...");
@@ -64,7 +73,11 @@ public class MigrationLockService {
             connection.setAutoCommit(true);
         }
     }
-
+    /**
+     * Releases the lock held by the current process.
+     *
+     * @throws SQLException if a database error occurs
+     */
     public void unlock() throws SQLException {
         log.debug("Releasing lock...");
 
@@ -85,7 +98,12 @@ public class MigrationLockService {
             }
         }
     }
-
+    /**
+     * Checks if the migration process is currently locked.
+     *
+     * @return true if the migration is locked, false otherwise
+     * @throws SQLException if a database error occurs
+     */
     public boolean isLocked() throws SQLException {
         String checkLockSql = """
                 SELECT is_locked 
