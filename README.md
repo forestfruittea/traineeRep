@@ -84,8 +84,6 @@ java -jar target\MigrationManager-1.0-SNAPSHOT.jar migrate
 ..........................................................
 2024-11-25 15:30:38 [main] INFO - Migration starts
 2024-11-25 15:30:38 [main] INFO - Current database version: 1
-2024-11-25 15:30:38 [main] INFO - Migrating to version: 2
-2024-11-25 15:30:38 [main] INFO - Migration applied successfully for version: 2
 2024-11-25 15:30:38 [main] INFO - Migrating to version: 3
 2024-11-25 15:30:38 [main] INFO - Migration applied successfully for version: 3
 2024-11-25 15:30:38 [main] INFO - All migrations applied successfully
@@ -99,8 +97,6 @@ java -jar target\MigrationManager-1.0-SNAPSHOT.jar rollback -v 1
 
 ................................................................
 2024-11-25 15:45:47 [main] INFO - Current database version: 3
-2024-11-25 15:45:47 [main] INFO - Rolling back version: 2
-2024-11-25 15:45:47 [main] INFO - Rollback SQL applied for version: 2
 2024-11-25 15:45:47 [main] INFO - Rolling back version: 1
 2024-11-25 15:45:47 [main] INFO - Rollback SQL applied for version: 1
 2024-11-25 15:45:47 [main] INFO - Rollback completed successfully to version: 1
