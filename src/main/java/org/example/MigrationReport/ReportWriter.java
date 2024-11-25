@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
 /**
- * Utility class to write    reports to a file in JSON format.
+ * Utility class to write reports to a file in JSON format.
  */
 public class ReportWriter {
     private static final ObjectMapper objectMapper = new ObjectMapper();
