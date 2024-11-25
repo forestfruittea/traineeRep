@@ -61,7 +61,7 @@ public class MigrationTool {
             migrationLockService.unlock();
             connection.setAutoCommit(true);
         }
-        log.debug("Migration process ends");
+        log.info("Migration process ends");
     }
     public void rollback(String targetVersion) throws SQLException {
         MigrationLockService migrationLockService = new MigrationLockService(connection);

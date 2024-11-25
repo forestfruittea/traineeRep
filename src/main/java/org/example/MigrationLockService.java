@@ -18,7 +18,7 @@ public class MigrationLockService {
     }
 
     public void lock(String lockedBy) throws SQLException {
-        log.info("Attempting to acquire lock...");
+        log.debug("Attempting to acquire lock...");
 
         String checkLockSql = """
                 SELECT is_locked 
@@ -55,7 +55,7 @@ public class MigrationLockService {
 
             connection.commit();
 
-            log.info("Lock acquired successfully by: " + lockedBy);
+            log.debug("Lock acquired successfully by: " + lockedBy);
         } catch (SQLException | IllegalStateException e) {
             connection.rollback();
             log.error("Failed to acquire lock: {}", e.getMessage());
@@ -66,7 +66,7 @@ public class MigrationLockService {
     }
 
     public void unlock() throws SQLException {
-        log.info("Releasing lock...");
+        log.debug("Releasing lock...");
 
         String unlockSql = """
                 UPDATE migration_lock 
@@ -79,7 +79,7 @@ public class MigrationLockService {
         try (PreparedStatement unlockStmt = connection.prepareStatement(unlockSql)) {
             int rowsUpdated = unlockStmt.executeUpdate();
             if (rowsUpdated > 0) {
-                log.info("Lock released successfully.");
+                log.debug("Lock released successfully.");
             } else {
                 log.warn("Lock was not held.");
             }
@@ -97,12 +97,12 @@ public class MigrationLockService {
             ResultSet resultSet = checkLockStmt.executeQuery();
             if (resultSet.next()) {
                 boolean locked = resultSet.getBoolean("is_locked");
-                log.info("Lock status: " + (locked ? "Locked" : "Unlocked"));
+                log.debug("Lock status: " + (locked ? "Locked" : "Unlocked"));
                 return locked;
             }
 
             // If no row exists, assume unlocked
-            log.info("No lock record found. Assuming unlocked.");
+            log.debug("No lock record found. Assuming unlocked.");
             return false;
         }
     }

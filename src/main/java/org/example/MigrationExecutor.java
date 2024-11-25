@@ -66,7 +66,7 @@ public class MigrationExecutor {
 
     public void applyMigration(String version, String description, String sql) throws SQLException {
         MigrationReport migrationReport = null;
-        log.debug("Migrating to version: {}", version);
+        log.info("Migrating to version: {}", version);
         try (Statement statement = connection.createStatement()) {
                 statement.execute(sql);
             String insertVersionSql = "INSERT INTO schema_version (version, description, applied_at) VALUES (?, ?, ?)";
@@ -103,7 +103,7 @@ public class MigrationExecutor {
     }
 
     public void rollbackMigration(String version, String description, String sql) throws SQLException {
-        log.debug("Rolling back version: {}", version);
+        log.info("Rolling back version: {}", version);
         MigrationReport migrationReport = null;
 
         try (Statement statement = connection.createStatement()) {

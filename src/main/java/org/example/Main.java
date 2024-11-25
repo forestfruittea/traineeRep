@@ -20,21 +20,25 @@ public class Main {
         try {
 
             Connection connection = connectionManager.connect();
-            log.debug("db is connected");
+
             MigrationExecutor migrationExecutor = new MigrationExecutor(connection);
             MigrationTool migrationTool = new MigrationTool(migrationExecutor, connection, config);
             migrationExecutor.initializeSchemaTable();
             migrationExecutor.initializeLockTable();
 
+            migrationTool.migrate();
+            migrationTool.rollback("2");
+
+
             cmd.addSubcommand("migrate", new MigrateCommand(migrationTool));
             cmd.addSubcommand("rollback", new RollbackCommand(migrationTool));
             cmd.addSubcommand("status", new StatusCommand(migrationTool));
-            int exitCode = cmd.execute(args);
-            System.exit(exitCode);
-            connection.close();
-            log.debug("connection is closed");
+
         } catch (Exception e) {
             log.error("An error occured: ", e);
+        } finally {
+            int exitCode = cmd.execute(args);
+            System.exit(exitCode);
         }
     }
 }
